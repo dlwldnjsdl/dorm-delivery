@@ -1,0 +1,804 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --dku-blue: #1659b7;
+  --dku-blue-dark: #0c438f;
+  --dku-blue-light: #eef5ff;
+  --background: #f5f7fb;
+  --text: #222222;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  background: var(--background);
+  color: var(--text);
+}
+
+button,
+input {
+  font-family: inherit;
+}
+
+
+/* =========================
+   로그인
+========================= */
+
+.login-page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 24px;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 430px;
+
+  padding: 48px;
+
+  background: white;
+
+  border-radius: 24px;
+
+  box-shadow:
+    0 12px 40px
+    rgba(23, 63, 120, 0.1);
+}
+
+.brand {
+  text-align: center;
+
+  margin-bottom: 38px;
+}
+
+.dku-badge {
+  width: 78px;
+  height: 78px;
+
+  margin: 0 auto 18px;
+
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--dku-blue),
+      var(--dku-blue-dark)
+    );
+
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  box-shadow:
+    0 8px 22px
+    rgba(22, 89, 183, 0.25);
+}
+
+.bear {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.dku-text {
+  margin-top: 4px;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  letter-spacing: 1.5px;
+}
+
+.brand h1 {
+  margin: 0;
+
+  color: var(--dku-blue-dark);
+
+  font-size: 50px;
+  font-weight: 800;
+
+  letter-spacing: -2px;
+}
+
+.brand-en {
+  display: inline-block;
+
+  margin-top: 4px;
+
+  color: var(--dku-blue);
+
+  font-size: 12px;
+  font-weight: 800;
+
+  letter-spacing: 3px;
+}
+
+.brand p {
+  margin: 13px 0 0;
+
+  color: #666;
+
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.input-group input {
+  width: 100%;
+
+  padding: 16px 17px;
+
+  border: 1px solid #dddddd;
+  border-radius: 11px;
+
+  outline: none;
+
+  background: white;
+
+  font-size: 16px;
+
+  transition: 0.2s;
+}
+
+.input-group input::placeholder {
+  color: #aaaaaa;
+}
+
+.input-group input:focus {
+  border-color: var(--dku-blue);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(22, 89, 183, 0.09);
+}
+
+.login-button {
+  width: 100%;
+
+  margin-top: 20px;
+
+  padding: 16px;
+
+  border: none;
+  border-radius: 11px;
+
+  background: var(--dku-blue);
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.login-button:hover {
+  background: var(--dku-blue-dark);
+}
+
+.message {
+  margin: 18px 0 0;
+
+  text-align: center;
+
+  color: #555;
+
+  font-size: 14px;
+}
+
+.signup-text {
+  margin: 30px 0 0;
+
+  text-align: center;
+
+  color: #888;
+
+  font-size: 14px;
+}
+
+.signup-button {
+  margin-left: 8px;
+
+  padding: 0;
+
+  border: none;
+
+  background: none;
+
+  color: var(--dku-blue);
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+/* =========================
+   메인 화면
+========================= */
+
+.main-page {
+  width: 100%;
+  min-height: 100vh;
+
+  background: #f5f7fb;
+}
+
+
+/* 상단 */
+
+.top-header {
+  width: 100%;
+
+  background: white;
+
+  border-bottom: 1px solid #e9edf3;
+}
+
+.header-inner {
+  width: 100%;
+  max-width: 1100px;
+
+  margin: 0 auto;
+
+  padding: 18px 28px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.small-bear {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 15px;
+
+  background: var(--dku-blue);
+
+  font-size: 23px;
+}
+
+.header-brand h1 {
+  margin: 0;
+
+  color: var(--dku-blue-dark);
+
+  font-size: 25px;
+}
+
+.header-brand span {
+  color: #888;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 2px;
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+
+  gap: 16px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+
+  text-align: right;
+}
+
+.user-info strong {
+  font-size: 14px;
+}
+
+.user-info span {
+  margin-top: 2px;
+
+  color: #888;
+
+  font-size: 12px;
+}
+
+.logout-button {
+  padding: 9px 13px;
+
+  border: 1px solid #dddddd;
+  border-radius: 9px;
+
+  background: white;
+
+  color: #555;
+
+  cursor: pointer;
+}
+
+
+/* 콘텐츠 */
+
+.main-content {
+  position: relative;
+
+  width: 100%;
+  max-width: 1100px;
+
+  margin: 0 auto;
+
+  padding: 50px 28px 120px;
+}
+
+
+/* 환영 영역 */
+
+.welcome-section {
+  margin-bottom: 45px;
+}
+
+.welcome-small {
+  margin: 0 0 9px;
+
+  color: var(--dku-blue);
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.welcome-section h2 {
+  margin: 0;
+
+  color: #1d2433;
+
+  font-size: 32px;
+  line-height: 1.35;
+
+  letter-spacing: -1px;
+}
+
+
+/* 방 목록 */
+
+.room-section-header {
+  margin-bottom: 20px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.room-section-header h3 {
+  margin: 0;
+
+  font-size: 22px;
+}
+
+.room-section-header p {
+  margin: 7px 0 0;
+
+  color: #888;
+
+  font-size: 14px;
+}
+
+.refresh-button {
+  padding: 9px 14px;
+
+  border: 1px solid #dfe5ee;
+  border-radius: 9px;
+
+  background: white;
+
+  color: #555;
+
+  cursor: pointer;
+}
+
+
+/* 방 카드 */
+
+.room-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fill, minmax(280px, 1fr));
+
+  gap: 18px;
+}
+
+.room-card {
+  padding: 23px;
+
+  background: white;
+
+  border: 1px solid #edf0f5;
+  border-radius: 18px;
+
+  box-shadow:
+    0 5px 18px
+    rgba(0, 0, 0, 0.035);
+
+  transition: 0.2s;
+}
+
+.room-card:hover {
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 10px 24px
+    rgba(21, 71, 140, 0.09);
+}
+
+.room-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-badge {
+  padding: 6px 10px;
+
+  border-radius: 20px;
+
+  background: #eeeeee;
+
+  color: #666;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-badge.RECRUITING {
+  background: #e8f2ff;
+  color: var(--dku-blue);
+}
+
+.status-badge.RECRUITMENT_COMPLETE {
+  background: #fff0d9;
+  color: #c97700;
+}
+
+.status-badge.ORDERING {
+  background: #f0eaff;
+  color: #7148c7;
+}
+
+.status-badge.SETTLEMENT_COMPLETE {
+  background: #e5f8ed;
+  color: #278750;
+}
+
+.status-badge.COMPLETED {
+  background: #eeeeee;
+  color: #777777;
+}
+
+.people-count {
+  color: #777;
+
+  font-size: 13px;
+}
+
+.room-card h4 {
+  margin: 20px 0 17px;
+
+  color: #202534;
+
+  font-size: 20px;
+}
+
+.room-info {
+  margin-bottom: 20px;
+}
+
+.room-info p {
+  margin: 9px 0;
+
+  color: #666;
+
+  font-size: 14px;
+}
+
+.room-info p span {
+  display: inline-block;
+
+  width: 25px;
+}
+
+.enter-room-button {
+  width: 100%;
+
+  padding: 12px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: var(--dku-blue-light);
+
+  color: var(--dku-blue);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.enter-room-button:hover {
+  background: var(--dku-blue);
+  color: white;
+}
+
+
+/* 방 없을 때 */
+
+.empty-box {
+  padding: 65px 25px;
+
+  text-align: center;
+
+  background: white;
+
+  border: 1px dashed #d7dde6;
+  border-radius: 18px;
+
+  color: #777;
+}
+
+.empty-icon {
+  margin-bottom: 12px;
+
+  font-size: 38px;
+}
+
+.empty-box h4 {
+  margin: 0;
+
+  color: #333;
+
+  font-size: 18px;
+}
+
+.empty-box p {
+  margin: 8px 0 0;
+
+  font-size: 14px;
+}
+
+
+/* 방 만들기 */
+
+.create-room-button {
+  position: fixed;
+
+  right: 35px;
+  bottom: 35px;
+
+  padding: 16px 24px;
+
+  border: none;
+  border-radius: 50px;
+
+  background: var(--dku-blue);
+
+  color: white;
+
+  box-shadow:
+    0 8px 24px
+    rgba(22, 89, 183, 0.3);
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.create-room-button span {
+  margin-right: 5px;
+
+  font-size: 20px;
+}
+
+.create-room-button:hover {
+  background: var(--dku-blue-dark);
+
+  transform: translateY(-2px);
+}
+
+
+/* 모바일 */
+
+@media (max-width: 600px) {
+
+  .login-box {
+    padding: 40px 28px;
+  }
+
+  .brand h1 {
+    font-size: 44px;
+  }
+
+  .header-inner {
+    padding: 15px 18px;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .main-content {
+    padding: 35px 18px 110px;
+  }
+
+  .welcome-section h2 {
+    font-size: 27px;
+  }
+
+  .room-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .create-room-button {
+    right: 20px;
+    bottom: 20px;
+  }
+}
+
+   .detail-top-buttons {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+
+     margin-bottom: 18px;
+   }
+
+   .detail-top-buttons .back-button {
+     margin-bottom: 0;
+   }
+
+   .delete-room-button {
+     padding: 10px 15px;
+
+     border: 1px solid #ffd6d6;
+     border-radius: 9px;
+
+     background: #fff2f2;
+     color: #d33;
+
+     font-size: 14px;
+     font-weight: 700;
+
+     cursor: pointer;
+   }
+
+   .delete-room-button:hover {
+     background: #ffe4e4;
+   }
+
+   /* =========================
+      방 필터
+   ========================= */
+
+   .room-filter-bar {
+     display: flex;
+     align-items: center;
+
+     gap: 9px;
+
+     margin-bottom: 20px;
+   }
+
+   .room-filter-button {
+     padding: 9px 14px;
+
+     display: flex;
+     align-items: center;
+
+     gap: 7px;
+
+     border: 1px solid #dfe5ee;
+     border-radius: 30px;
+
+     background: white;
+
+     color: #777;
+
+     font-size: 13px;
+     font-weight: 700;
+
+     cursor: pointer;
+
+     transition: 0.2s;
+   }
+
+   .room-filter-button span {
+     min-width: 20px;
+
+     padding: 2px 6px;
+
+     border-radius: 20px;
+
+     background: #f0f2f5;
+
+     color: #888;
+
+     font-size: 11px;
+
+     text-align: center;
+   }
+
+   .room-filter-button:hover {
+     border-color: var(--dku-blue);
+
+     color: var(--dku-blue);
+   }
+
+   .room-filter-button.active {
+     border-color: var(--dku-blue);
+
+     background: var(--dku-blue);
+
+     color: white;
+   }
+
+   .room-filter-button.active span {
+     background: rgba(255, 255, 255, 0.2);
+
+     color: white;
+   }
+
+   @media (max-width: 600px) {
+     .room-filter-bar {
+       overflow-x: auto;
+     }
+
+     .room-filter-button {
+       flex-shrink: 0;
+     }
+   }

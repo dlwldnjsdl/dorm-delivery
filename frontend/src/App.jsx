@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
-const API = "http://localhost:8080";
+const HOST = window.location.hostname;
+const API = `http://${HOST}:8080`;
 
 function App() {
   // =========================
@@ -133,7 +134,7 @@ function App() {
 
     loadChatHistory(roomId);
 
-    const ws = new WebSocket("ws://localhost:8080/ws");
+    const ws = new WebSocket(`ws://${HOST}:8080/ws`);
 
     ws.onopen = () => {
       const connectFrame =
@@ -244,13 +245,10 @@ function App() {
     try {
       const response = await fetch(`${API}/users/login`, {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-
         credentials: "include",
-
         body: JSON.stringify({
           phone,
           password,
@@ -258,21 +256,20 @@ function App() {
       });
 
       if (!response.ok) {
-        setMessage("전화번호 또는 비밀번호를 확인해주세요.");
+        const errorText = await response.text();
+
+        setMessage(
+          errorText || "전화번호 또는 비밀번호를 확인해주세요."
+        );
         return;
       }
 
       const loginUser = await response.json();
 
       if (rememberPhone) {
-        localStorage.setItem(
-          "rememberedPhone",
-          phone
-        );
+        localStorage.setItem("rememberedPhone", phone);
       } else {
-        localStorage.removeItem(
-          "rememberedPhone"
-        );
+        localStorage.removeItem("rememberedPhone");
       }
 
       setUser(loginUser);
@@ -281,7 +278,6 @@ function App() {
       await loadRooms(true, loginUser.id);
     } catch (error) {
       console.log(error);
-
       setMessage("서버에 연결할 수 없습니다.");
     }
   };
@@ -293,7 +289,7 @@ function App() {
   const signup = async () => {
     if (
       !signupName.trim() ||
-      !signupDormitory.trim() ||
+      !signupDormitory ||
       !phone.trim() ||
       !password.trim()
     ) {
@@ -304,13 +300,10 @@ function App() {
     try {
       const response = await fetch(`${API}/users/signup`, {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-
         credentials: "include",
-
         body: JSON.stringify({
           name: signupName,
           phone,
@@ -325,7 +318,6 @@ function App() {
         setMessage(
           errorText || "회원가입에 실패했습니다."
         );
-
         return;
       }
 
@@ -334,71 +326,65 @@ function App() {
       setPassword("");
 
       setAuthMode("login");
-
       setMessage("회원가입 완료! 로그인해주세요.");
     } catch (error) {
       console.log(error);
-
       setMessage("서버에 연결할 수 없습니다.");
     }
   };
 
-    const resetPassword = async () => {
-      if (
-        !resetName.trim() ||
-        !resetDormitory ||
-        !phone.trim() ||
-        !newPassword.trim()
-      ) {
-        setMessage("모든 정보를 입력해주세요.");
+  // =========================
+  // 비밀번호 재설정
+  // =========================
+
+  const resetPassword = async () => {
+    if (
+      !resetName.trim() ||
+      !resetDormitory ||
+      !phone.trim() ||
+      !newPassword.trim()
+    ) {
+      setMessage("모든 정보를 입력해주세요.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API}/users/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: resetName,
+          phone,
+          dormitory: resetDormitory,
+          newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+
+        setMessage(
+          errorText || "비밀번호 변경에 실패했습니다."
+        );
         return;
       }
 
-      try {
-        const response = await fetch(
-          `${API}/users/reset-password`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+      setPassword("");
+      setNewPassword("");
+      setResetName("");
+      setResetDormitory("");
 
-            body: JSON.stringify({
-              name: resetName,
-              phone,
-              dormitory: resetDormitory,
-              newPassword,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          const errorText = await response.text();
-
-          setMessage(
-            errorText ||
-            "비밀번호 변경에 실패했습니다."
-          );
-
-          return;
-        }
-
-        setPassword("");
-        setNewPassword("");
-        setResetName("");
-        setResetDormitory("");
-
-        setAuthMode("login");
-
-        setMessage(
-          "비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요."
-        );
-      } catch (error) {
-        console.log(error);
-
-        setMessage("서버에 연결할 수 없습니다.");
-      }
-    };
+      setAuthMode("login");
+      setMessage(
+        "비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요."
+      );
+    } catch (error) {
+      console.log(error);
+      setMessage("서버에 연결할 수 없습니다.");
+    }
+  };
 
   // =========================
   // 로그아웃
@@ -423,7 +409,7 @@ function App() {
     setMembers([]);
     setChats([]);
 
-    setPhone("");
+    setPhone(localStorage.getItem("rememberedPhone") || "");
     setPassword("");
     setMessage("");
 
@@ -995,25 +981,18 @@ function App() {
   if (!user) {
     return (
       <div className="login-page">
-
         <div className="login-box">
 
           <div className="brand">
-
             <div className="dku-badge">
-              <span className="bear">
-                🐻
-              </span>
-
-              <span className="dku-text">
-                DKU
-              </span>
+              <span className="bear">🐻</span>
+              <span className="dku-text">DKU</span>
             </div>
 
-            <h1>잇단</h1>
+            <h1>단짝</h1>
 
             <span className="brand-en">
-              EAT-DAN
+              DAN-JJAK
             </span>
 
             <p>
@@ -1023,19 +1002,14 @@ function App() {
             <span className="campus-notice">
               단국대학교 죽전캠퍼스 생활관 전용
             </span>
-
           </div>
 
 
-          {/* =========================
-              로그인 / 회원가입 탭
-          ========================= */}
-
           {authMode !== "reset" && (
-
             <div className="auth-tabs">
 
               <button
+                type="button"
                 className={
                   authMode === "login"
                     ? "auth-tab active"
@@ -1049,8 +1023,8 @@ function App() {
                 로그인
               </button>
 
-
               <button
+                type="button"
                 className={
                   authMode === "signup"
                     ? "auth-tab active"
@@ -1065,16 +1039,10 @@ function App() {
               </button>
 
             </div>
-
           )}
 
 
-          {/* =========================
-              회원가입 추가 정보
-          ========================= */}
-
           {authMode === "signup" && (
-
             <div className="input-group">
 
               <input
@@ -1082,22 +1050,16 @@ function App() {
                 placeholder="이름"
                 value={signupName}
                 onChange={(e) =>
-                  setSignupName(
-                    e.target.value
-                  )
+                  setSignupName(e.target.value)
                 }
               />
-
 
               <select
                 value={signupDormitory}
                 onChange={(e) =>
-                  setSignupDormitory(
-                    e.target.value
-                  )
+                  setSignupDormitory(e.target.value)
                 }
               >
-
                 <option value="" disabled>
                   기숙사를 선택해주세요
                 </option>
@@ -1113,22 +1075,14 @@ function App() {
                 <option value="진리관">
                   진리관
                 </option>
-
               </select>
 
             </div>
-
           )}
 
 
-          {/* =========================
-              로그인 / 회원가입 공통
-          ========================= */}
-
           {authMode !== "reset" && (
-
             <>
-
               <div className="input-group">
 
                 <input
@@ -1149,13 +1103,11 @@ function App() {
                   }
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-
                       if (authMode === "login") {
                         login();
                       } else {
                         signup();
                       }
-
                     }
                   }}
                 />
@@ -1163,12 +1115,7 @@ function App() {
               </div>
 
 
-              {/* =========================
-                  로그인 정보 저장 / 비밀번호 찾기
-              ========================= */}
-
               {authMode === "login" && (
-
                 <div className="login-options">
 
                   <label className="remember-login">
@@ -1189,7 +1136,6 @@ function App() {
 
                   </label>
 
-
                   <button
                     type="button"
                     className="forgot-password-button"
@@ -1202,45 +1148,31 @@ function App() {
                   </button>
 
                 </div>
-
               )}
 
 
-              {/* =========================
-                  로그인 / 회원가입 버튼
-              ========================= */}
-
               {authMode === "login" ? (
-
                 <button
+                  type="button"
                   className="login-button"
                   onClick={login}
                 >
                   로그인
                 </button>
-
               ) : (
-
                 <button
+                  type="button"
                   className="login-button"
                   onClick={signup}
                 >
-                  잇단 시작하기
+                  단짝 시작하기
                 </button>
-
               )}
-
             </>
-
           )}
 
 
-          {/* =========================
-              비밀번호 재설정 화면
-          ========================= */}
-
           {authMode === "reset" && (
-
             <div className="reset-area">
 
               <h3>
@@ -1251,7 +1183,6 @@ function App() {
                 가입할 때 입력한 정보를 확인해주세요.
               </p>
 
-
               <div className="input-group">
 
                 <input
@@ -1259,12 +1190,9 @@ function App() {
                   placeholder="이름"
                   value={resetName}
                   onChange={(e) =>
-                    setResetName(
-                      e.target.value
-                    )
+                    setResetName(e.target.value)
                   }
                 />
-
 
                 <select
                   value={resetDormitory}
@@ -1274,7 +1202,6 @@ function App() {
                     )
                   }
                 >
-
                   <option value="" disabled>
                     기숙사를 선택해주세요
                   </option>
@@ -1290,45 +1217,38 @@ function App() {
                   <option value="진리관">
                     진리관
                   </option>
-
                 </select>
-
 
                 <input
                   type="text"
                   placeholder="전화번호"
                   value={phone}
                   onChange={(e) =>
-                    setPhone(
-                      e.target.value
-                    )
+                    setPhone(e.target.value)
                   }
                 />
-
 
                 <input
                   type="password"
                   placeholder="새 비밀번호"
                   value={newPassword}
                   onChange={(e) =>
-                    setNewPassword(
-                      e.target.value
-                    )
+                    setNewPassword(e.target.value)
                   }
                 />
 
               </div>
 
-
               <button
+                type="button"
                 className="login-button"
                 onClick={resetPassword}
               >
                 비밀번호 변경
               </button>
 
-
               <button
+                type="button"
                 className="back-login-button"
                 onClick={() => {
                   setAuthMode("login");
@@ -1339,7 +1259,6 @@ function App() {
               </button>
 
             </div>
-
           )}
 
 
@@ -1350,10 +1269,11 @@ function App() {
           )}
 
         </div>
-
       </div>
     );
   }
+
+
 
   // =========================
   // 방 상세
@@ -1396,8 +1316,8 @@ function App() {
               </div>
 
               <div>
-                <h1>잇단</h1>
-                <span>EAT-DAN</span>
+                <h1>단짝</h1>
+                <span>DAN-JJAK</span>
               </div>
 
             </div>
@@ -1949,7 +1869,7 @@ function App() {
               </h3>
 
               <p>
-                잇단에서 맛있는 한 끼를 함께했어요.
+                단짝에서 맛있는 한 끼를 함께했어요.
               </p>
 
               <button onClick={goBack}>
@@ -1984,8 +1904,8 @@ function App() {
             </div>
 
             <div>
-              <h1>잇단</h1>
-              <span>EAT-DAN</span>
+              <h1>단짝</h1>
+              <span>DAN-JJAK</span>
             </div>
 
           </div>

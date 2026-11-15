@@ -11,6 +11,12 @@ function App() {
   // =========================
 
   const [authMode, setAuthMode] = useState("login");
+  const [passwordResetAvailable, setPasswordResetAvailable] = useState(false);
+  useEffect(() => {
+    fetch('/users/capabilities').then(response => response.ok ? response.json() : {})
+      .then(config => setPasswordResetAvailable(config.passwordResetAvailable === true))
+      .catch(() => setPasswordResetAvailable(false));
+  }, []);
 
   const [rememberPhone, setRememberPhone] = useState(
     () => localStorage.getItem("rememberedPhone") !== null
@@ -142,7 +148,7 @@ function App() {
       const connectFrame =
         "CONNECT\n" +
         "accept-version:1.2\n" +
-        "host:localhost\n" +
+        `host:${window.location.host}\n` +
         "\n" +
         "\0";
 
@@ -1150,7 +1156,7 @@ function App() {
 
                   </label>
 
-                  <button
+                  {passwordResetAvailable && <button
                     type="button"
                     className="forgot-password-button"
                     onClick={() => {
@@ -1159,7 +1165,7 @@ function App() {
                     }}
                   >
                     비밀번호를 잊으셨나요?
-                  </button>
+                  </button>}
 
                 </div>
               )}

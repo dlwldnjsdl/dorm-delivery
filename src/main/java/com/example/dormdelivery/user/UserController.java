@@ -11,6 +11,13 @@ import java.util.Set;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    @org.springframework.beans.factory.annotation.Value("${app.password-reset.enabled:true}")
+    private boolean passwordResetEnabled;
+
+    @GetMapping("/capabilities")
+    public Map<String,Boolean> capabilities() {
+        return Map.of("passwordResetAvailable",passwordResetEnabled);
+    }
     private final com.example.dormdelivery.push.PushDevices pushDevices;
 
     private final UserRepository userRepository;
@@ -252,6 +259,7 @@ public class UserController {
     public ResponseEntity<?> resetPassword(
             @RequestBody Map<String, String> request
     ) {
+        if(!passwordResetEnabled) return ResponseEntity.status(403).body("이 환경에서는 비밀번호 재설정을 사용할 수 없습니다.");
 
         String name = request.get("name");
         String phone = request.get("phone");
@@ -298,8 +306,10 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUser(
-            @PathVariable Long id
+            @PathVariable Long id, HttpSession session
     ) {
+        Long loginId=com.example.dormdelivery.push.PushSubscriptions.user(session);
+        if(!loginId.equals(id)) return ResponseEntity.status(403).build();
 
         User user =
                 userRepository

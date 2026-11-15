@@ -120,6 +120,17 @@
     <build>
 
         <plugins>
+            <!-- Exclude retired pages even when an incremental build leaves stale resources. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>static/chat-test.html</exclude>
+                        <exclude>chat-test.html</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
 
             <plugin>
                 <groupId>org.springframework.boot</groupId>

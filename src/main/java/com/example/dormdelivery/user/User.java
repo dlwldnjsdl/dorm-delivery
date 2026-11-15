@@ -22,6 +22,7 @@ public class User {
 
     // 전화번호
     @Column(unique = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String phone;
 
     // 비밀번호

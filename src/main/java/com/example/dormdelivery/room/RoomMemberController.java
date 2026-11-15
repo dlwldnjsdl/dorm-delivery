@@ -7,10 +7,16 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
+import com.example.dormdelivery.push.*;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/room-members")
 public class RoomMemberController {
+    private final ApplicationEventPublisher events;
 
     private final RoomMemberRepository roomMemberRepository;
     private final RoomRepository roomRepository;
@@ -19,7 +25,8 @@ public class RoomMemberController {
     public RoomMemberController(
             RoomMemberRepository roomMemberRepository,
             RoomRepository roomRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, ApplicationEventPublisher events) {
+        this.events=events;
 
         this.roomMemberRepository = roomMemberRepository;
         this.roomRepository = roomRepository;
@@ -28,19 +35,25 @@ public class RoomMemberController {
 
     // 특정 방 참여자 목록 조회
     @GetMapping("/room/{roomId}")
-    public List<RoomMember> getMembers(@PathVariable Long roomId) {
+    public List<RoomMember> getMembers(@PathVariable Long roomId, HttpSession session) {
+        Long userId=PushSubscriptions.user(session);
+        User user=userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        Room room=roomRepository.findById(roomId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if(!user.getDormitory().equals(room.getDormitory())) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         return roomMemberRepository.findByRoomId(roomId);
     }
 
     @GetMapping("/user/{userId}")
     public List<RoomMember> getUserRooms(
-            @PathVariable Long userId
+            @PathVariable Long userId, HttpSession session
     ) {
+        if(!PushSubscriptions.user(session).equals(userId)) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         return roomMemberRepository.findByUser_Id(userId);
     }
 
     // 실제 회원이 방에 참여
     @PostMapping("/room/{roomId}/user/{userId}")
+    @Transactional
     public ResponseEntity<?> joinRoom(
             @PathVariable Long roomId,
             @PathVariable Long userId,
@@ -140,7 +153,7 @@ public class RoomMemberController {
         );
 
         roomRepository.save(room);
-
+        events.publishEvent(new RoomNotice(roomId,userId,"JOIN"));
         return ResponseEntity.ok(member);
     }
 
@@ -148,7 +161,8 @@ public class RoomMemberController {
     // 방에서 참여자 나가기
     @DeleteMapping("/{memberId}")
     public ResponseEntity<Void> removeMember(
-            @PathVariable Long memberId) {
+            @PathVariable Long memberId, HttpSession session) {
+        requireOwner(memberId,session);
 
         return roomMemberRepository.findById(memberId)
                 .map(member -> {
@@ -182,7 +196,9 @@ public class RoomMemberController {
     // Ready 상태 변경
     @PostMapping("/{memberId}/ready")
     public ResponseEntity<RoomMember> toggleReady(
-            @PathVariable Long memberId) {
+            @PathVariable Long memberId, HttpSession session) {
+        RoomMember target=requireOwner(memberId,session);
+        if(!List.of("RECRUITING","RECRUITMENT_COMPLETE").contains(target.getRoom().getStatus())) return ResponseEntity.badRequest().build();
 
         return roomMemberRepository.findById(memberId)
                 .map(member -> {
@@ -224,7 +240,11 @@ public class RoomMemberController {
     // 방장 지정
     @PostMapping("/{memberId}/host")
     public ResponseEntity<RoomMember> assignHost(
-            @PathVariable Long memberId) {
+            @PathVariable Long memberId, HttpSession session) {
+        Long actor=PushSubscriptions.user(session);
+        RoomMember target=roomMemberRepository.findById(memberId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        boolean host=roomMemberRepository.findByRoomId(target.getRoom().getId()).stream().anyMatch(m -> m.isHost() && m.getUser()!=null && actor.equals(m.getUser().getId()));
+        if(!host) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
 
         return roomMemberRepository.findById(memberId)
                 .map(member -> {
@@ -255,8 +275,10 @@ public class RoomMemberController {
 
     // 방장만 주문 시작
     @PostMapping("/{memberId}/start-order")
+    @Transactional
     public ResponseEntity<Room> startOrder(
-            @PathVariable Long memberId) {
+            @PathVariable Long memberId, HttpSession session) {
+        requireOwner(memberId,session);
 
         return roomMemberRepository.findById(memberId)
                 .map(member -> {
@@ -278,6 +300,7 @@ public class RoomMemberController {
                     }
 
                     room.setStatus("ORDERING");
+                    events.publishEvent(new RoomNotice(room.getId(),member.getUser().getId(),"ORDER"));
 
                     Room savedRoom =
                             roomRepository.save(room);
@@ -290,7 +313,8 @@ public class RoomMemberController {
     // 개인 정산 완료 / 취소
     @PostMapping("/{memberId}/settle")
     public ResponseEntity<RoomMember> toggleSettlement(
-            @PathVariable Long memberId) {
+            @PathVariable Long memberId, HttpSession session) {
+        requireOwner(memberId,session);
 
         return roomMemberRepository.findById(memberId)
                 .map(member -> {
@@ -334,7 +358,8 @@ public class RoomMemberController {
     // 방장만 최종 완료
     @PostMapping("/{memberId}/complete")
     public ResponseEntity<Room> completeRoom(
-            @PathVariable Long memberId) {
+            @PathVariable Long memberId, HttpSession session) {
+        requireOwner(memberId,session);
 
         return roomMemberRepository.findById(memberId)
                 .map(member -> {
@@ -363,5 +388,11 @@ public class RoomMemberController {
                     return ResponseEntity.ok(savedRoom);
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+    private RoomMember requireOwner(Long memberId,HttpSession session) {
+        Long user=PushSubscriptions.user(session);
+        RoomMember member=roomMemberRepository.findById(memberId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if(member.getUser()==null || !user.equals(member.getUser().getId())) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        return member;
     }
 }

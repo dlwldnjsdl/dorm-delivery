@@ -42,6 +42,18 @@
 
 
     <dependencies>
+        <dependency>
+            <groupId>org.bitbucket.b_c</groupId><artifactId>jose4j</artifactId><version>0.9.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId><artifactId>bcprov-jdk18on</artifactId><version>1.83</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.martijndwars</groupId><artifactId>web-push</artifactId><version>5.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId><artifactId>h2</artifactId><scope>test</scope>
+        </dependency>
 
         <!-- JPA -->
         <dependency>

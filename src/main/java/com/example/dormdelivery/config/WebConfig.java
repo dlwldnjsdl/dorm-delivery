@@ -6,14 +6,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+    @org.springframework.beans.factory.annotation.Value("${app.allowed-origins:http://localhost:5173,http://localhost:8080}")
+    private String origins;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns(
-                        "http://localhost:*",
-                        "http://192.168.*:*"
-                )
+                .allowedOrigins(origins.split(","))
                 .allowedMethods(
                         "GET",
                         "POST",

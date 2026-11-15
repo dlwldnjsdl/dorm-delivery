@@ -27,6 +27,20 @@ git check-ignore secrets/vapid.json
 
 연락처를 물으면 본인의 메일 주소를 mailto:접두사와 함께 입력합니다. DB_PASSWORD가 이미 있으면 다시 묻지 않습니다. 없다면 보안 입력창에서 MySQL root 비밀번호를 입력합니다. 키와 비밀번호 값은 출력하지 않습니다.
 
+일반 이메일만 입력해도 mailto:로 정규화합니다. 앞뒤 공백도 제거하며 키 파일 자체는 변경하지 않습니다. 기존 환경변수의 연락처를 덮어쓰려면 다음처럼 지정하세요(예시 주소 대신 본인의 연락처 입력).
+
+```powershell
+.\scripts\start-backend.ps1 -Subject 'mailto:your-email@example.com'
+```
+
+서버나 DB를 시작하지 않고 기존 키 형식·일치 여부와 자식 프로세스로의 환경변수 전달만 검사할 수도 있습니다.
+
+```powershell
+.\scripts\start-backend.ps1 -CheckOnly -Subject 'mailto:your-email@example.com'
+```
+
+정상 시작 시 `Web Push 초기화 완료 [READY]`가 표시됩니다. 오류가 있으면 값 대신 `VAPID_SUBJECT_INVALID`, `VAPID_PUBLIC_KEY_MISSING`, `VAPID_KEY_PAIR_MISMATCH` 등의 원인 코드만 표시합니다. 기존 포괄적 경고만으로 과거 실행의 입력을 소급 확정할 수는 없습니다.
+
 PowerShell 실행 정책으로 차단되면 다음처럼 이 스크립트 실행에만 적용합니다.
 
 ```powershell

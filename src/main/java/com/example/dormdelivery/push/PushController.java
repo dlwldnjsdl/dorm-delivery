@@ -13,7 +13,7 @@ public class PushController {
     private final PushDevices devices;
     public PushController(PushSubscriptions subscriptions, @Value("${push.public-key:}") String key, WebPushSender sender, PushDevices devices) {
         this.devices=devices;
-        this.subscriptions=subscriptions; this.publicKey=key; this.enabled=sender.available();
+        this.subscriptions=subscriptions; this.publicKey=key.strip(); this.enabled=sender.available();
     }
     @GetMapping("/public-key") public Map<String,Object> key(HttpSession session) {
         PushSubscriptions.user(session); return Map.of("enabled",enabled,"publicKey",enabled?publicKey:"");

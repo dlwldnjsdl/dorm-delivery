@@ -7,6 +7,16 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WebPushEncryptionTest {
+    @Test void acceptsPlainEmailAndAccidentalOuterWhitespaceWithoutReplacingKeys() throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+        var generator=KeyPairGenerator.getInstance("ECDH","BC");generator.initialize(new ECGenParameterSpec("prime256v1"));
+        var pair=generator.generateKeyPair();
+        String publicKey=Base64.getUrlEncoder().withoutPadding().encodeToString(((org.bouncycastle.jce.interfaces.ECPublicKey)pair.getPublic()).getQ().getEncoded(false));
+        byte[] integer=((org.bouncycastle.jce.interfaces.ECPrivateKey)pair.getPrivate()).getD().toByteArray();
+        byte[] scalar=new byte[32];System.arraycopy(integer,Math.max(0,integer.length-32),scalar,Math.max(0,32-integer.length),Math.min(32,integer.length));
+        String privateKey=Base64.getUrlEncoder().withoutPadding().encodeToString(scalar);
+        assertTrue(new WebPushSender(true,"  "+publicKey+"\n", " "+privateKey+" "," test@example.com ").available());
+    }
     @Test void generatesEncryptedPayloadAndVapidAuthorizationWithoutNetwork() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         var generator=KeyPairGenerator.getInstance("ECDH","BC");generator.initialize(new ECGenParameterSpec("prime256v1"));

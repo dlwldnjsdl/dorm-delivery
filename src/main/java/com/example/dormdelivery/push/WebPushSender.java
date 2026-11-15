@@ -13,6 +13,8 @@ import java.security.Security;
 @Component
 public class WebPushSender {
     private final EncryptedPushService service;
+    private final String initializationStatus;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(WebPushSender.class);
     private static class EncryptedPushService extends PushService {
         EncryptedPushService(String publicKey,String privateKey,String subject) throws Exception { super(publicKey,privateKey,subject); }
         nl.martijndwars.webpush.HttpRequest request(Notification notification) throws Exception { return prepareRequest(notification,Encoding.AES128GCM); }
@@ -23,16 +25,30 @@ public class WebPushSender {
                          @Value("${push.private-key:}") String privateKey,
                          @Value("${push.subject:}") String subject) {
         EncryptedPushService configured=null;
+        String status="DISABLED";
         if(enabled) {
             try {
-                if(subject.isBlank() || !(subject.startsWith("mailto:") || subject.startsWith("https://"))) throw new IllegalArgumentException();
+                VapidSettings settings=VapidSettings.parse(publicKey,privateKey,subject);
                 Security.addProvider(new BouncyCastleProvider());
-                configured=new EncryptedPushService(publicKey,privateKey,subject);
-            } catch(Exception e) { org.slf4j.LoggerFactory.getLogger(getClass()).warn("Web Push 설정이 유효하지 않아 발송을 비활성화했습니다."); }
+                var privateEc=(org.bouncycastle.jce.interfaces.ECPrivateKey)Utils.loadPrivateKey(settings.privateKey());
+                byte[] derived=privateEc.getParameters().getG().multiply(privateEc.getD()).getEncoded(false);
+                if(!java.security.MessageDigest.isEqual(derived,java.util.Base64.getUrlDecoder().decode(settings.publicKey()))) throw new VapidSettings.Invalid("VAPID_KEY_PAIR_MISMATCH");
+                configured=new EncryptedPushService(settings.publicKey(),settings.privateKey(),settings.subject());
+                status="READY";
+                log.info("Web Push 초기화 완료 [READY]");
+            } catch(VapidSettings.Invalid e) {
+                status=e.getMessage();
+                log.warn("Web Push 발송 비활성화 [{}]. 키 값은 출력하지 않습니다.",status);
+            } catch(Exception e) {
+                status="VAPID_CRYPTO_INITIALIZATION_FAILED";
+                log.warn("Web Push 발송 비활성화 [{}; {}]. 키 값과 예외 메시지는 출력하지 않습니다.",status,e.getClass().getSimpleName());
+            }
         }
         service=configured;
+        initializationStatus=status;
     }
     public boolean available() { return service!=null; }
+    public String initializationStatus() { return initializationStatus; }
     public int send(PushSubscription subscription, byte[] payload) throws Exception {
         if(service==null) return 503;
         var prepared=encryptedRequest(subscription,payload);

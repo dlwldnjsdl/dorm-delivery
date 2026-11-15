@@ -1,0 +1,12 @@
+{
+  "id": "/",
+  "name": "단짝 (DAN-JJAK)",
+  "short_name": "단짝",
+  "lang": "ko",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#1659b7",
+  "icons": [{"src":"/favicon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
+}

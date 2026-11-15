@@ -9,6 +9,22 @@
 
 ## 최초 설정
 
+### iPhone/iPad 및 카카오톡에서 열었을 때
+
+서버의 READY는 VAPID 발송 설정의 준비 상태입니다. 브라우저의 Push API 지원이나 권한 허용을 의미하지 않습니다.
+
+1. 카카오톡 내부 화면이면 메뉴에서 외부 브라우저로 열기를 선택하고 Safari로 접속하세요.
+2. iOS/iPadOS 16.4 이상에서 Safari 공유 메뉴 → 홈 화면에 추가를 선택하세요.
+3. 홈 화면의 단짝 아이콘으로 실행하세요. 필요한 경우 다시 로그인합니다.
+4. 알림 켜기를 직접 누르고 권한을 허용하세요. 자동으로 권한을 요청하지 않습니다.
+5. 이전에 홈 화면에 추가한 항목이 일반 브라우저 탭으로 열린다면 최신 배포 페이지에서 다시 추가하세요.
+
+manifest.webmanifest의 standalone 실행 설정과 Apple 웹앱 메타데이터를 제공합니다. 기존 화면과 Service Worker는 그대로 사용하며 오프라인 페이지 캐싱은 추가하지 않습니다.
+
+지원 검사는 보안 컨텍스트, Service Worker, Notification.requestPermission, PushManager를 각각 검사합니다. 보안 컨텍스트가 아니면 계속 차단합니다. Safari 홈 화면 실행 필요, 앱 내 브라우저 제한, API 미지원은 HTTPS 오류와 구분해서 안내합니다.
+
+참고: https://webkit.org/blog/13878/web-push-for-web-apps-on-ios-and-ipados/
+
 VS Code에서 프로젝트 폴더를 열고 PowerShell 터미널을 엽니다.
 
 ```powershell

@@ -1,0 +1,10 @@
+import { createECDH } from 'node:crypto';
+import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
+const directory = new URL('../secrets/', import.meta.url);
+const target = new URL('vapid.json', directory);
+if (existsSync(target)) throw new Error('기존 키 파일이 있습니다. 키를 덮어쓰지 않습니다.');
+const ecdh = createECDH('prime256v1');
+ecdh.generateKeys();
+mkdirSync(directory, { recursive: true });
+writeFileSync(target, JSON.stringify({ publicKey: ecdh.getPublicKey().toString('base64url'), privateKey: ecdh.getPrivateKey().toString('base64url') }), { mode: 0o600, flag: 'wx' });
+console.log('키 파일을 생성했습니다. 키 값은 출력하지 않습니다. secrets/vapid.json을 외부에 공유하지 마세요.');

@@ -11,6 +11,7 @@ import java.util.Set;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private final com.example.dormdelivery.push.PushDevices pushDevices;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -20,9 +21,10 @@ public class UserController {
 
     public UserController(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder, com.example.dormdelivery.push.PushDevices pushDevices
     ) {
         this.userRepository = userRepository;
+        this.pushDevices=pushDevices;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -88,6 +90,9 @@ public class UserController {
                 )
         );
 
+        // Registration must never update an existing account via a supplied entity ID.
+        user.setId(null);
+
         User savedUser =
                 userRepository.save(user);
 
@@ -103,7 +108,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(
             @RequestBody User request,
-            HttpSession session
+            HttpSession session, jakarta.servlet.http.HttpServletRequest httpRequest
     ) {
 
         User user =
@@ -172,6 +177,8 @@ public class UserController {
                     );
         }
 
+        pushDevices.reconcile(httpRequest,user.getId());
+        httpRequest.changeSessionId();
         session.setAttribute(
                 "userId",
                 user.getId()
@@ -230,9 +237,10 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
-            HttpSession session
+            HttpSession session, jakarta.servlet.http.HttpServletRequest request
     ) {
 
+        pushDevices.logout(request);
         session.invalidate();
 
         return ResponseEntity.ok(

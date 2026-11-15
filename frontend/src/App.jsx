@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
+import PushNotificationButton from './PushNotificationButton';
+import { logoutWithPush, syncExistingPush } from './push';
 
-const HOST = window.location.hostname;
-const API = `http://${HOST}:8080`;
+const API = '';
 
 function App() {
   // =========================
@@ -42,6 +43,7 @@ function App() {
 
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [members, setMembers] = useState([]);
+  const isSelectedRoomMember = members.some(member => member.room?.id === selectedRoom?.id && member.user?.id === user?.id);
 
   const [showCreateRoom, setShowCreateRoom] = useState(false);
 
@@ -132,9 +134,9 @@ function App() {
 
     const roomId = selectedRoom.id;
 
+    if (!isSelectedRoomMember) return;
     loadChatHistory(roomId);
-
-    const ws = new WebSocket(`ws://${HOST}:8080/ws`);
+    const ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`);
 
     ws.onopen = () => {
       const connectFrame =
@@ -206,7 +208,7 @@ function App() {
       setChatConnected(false);
       setSocket(null);
     };
-  }, [selectedRoom?.id]);
+  }, [selectedRoom?.id, isSelectedRoomMember]);
 
   // =========================
   // 로그인 확인
@@ -225,8 +227,10 @@ function App() {
       const currentUser = await response.json();
 
       setUser(currentUser);
+      await syncExistingPush().catch(() => {});
 
       await loadRooms(true, currentUser.id);
+      await openNotificationRoom();
     } catch (error) {
       console.log("로그인 세션 없음");
     }
@@ -273,9 +277,11 @@ function App() {
       }
 
       setUser(loginUser);
+      await syncExistingPush().catch(() => {});
       setMessage("");
 
       await loadRooms(true, loginUser.id);
+      await openNotificationRoom();
     } catch (error) {
       console.log(error);
       setMessage("서버에 연결할 수 없습니다.");
@@ -392,12 +398,10 @@ function App() {
 
   const logout = async () => {
     try {
-      await fetch(`${API}/users/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
+      await logoutWithPush();
     } catch (error) {
-      console.log(error);
+      alert(error.message);
+      return;
     }
 
     setUser(null);
@@ -563,6 +567,16 @@ function App() {
   // =========================
   // 방 들어가기
   // =========================
+
+  const openNotificationRoom = async () => {
+    const roomId = new URLSearchParams(window.location.search).get('room');
+    if (!/^\d+$/.test(roomId || '')) return;
+    const response = await fetch(`${API}/rooms/${roomId}`, { credentials: 'include' });
+    if (response.ok) {
+      await openRoom(await response.json());
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  };
 
   const openRoom = async (room) => {
     setSelectedRoom(room);
@@ -1324,6 +1338,7 @@ function App() {
 
 
             <div className="user-area">
+              <PushNotificationButton />
 
               <div className="user-info">
 
@@ -1912,6 +1927,7 @@ function App() {
 
 
           <div className="user-area">
+            <PushNotificationButton />
 
             <div className="user-info">
 

@@ -10,13 +10,13 @@
   "theme_color": "#1659b7",
   "icons": [
     {
-      "src": "/push-icon.png?v=danjjak-bear-1",
+      "src": "/push-icon.png?v=danjjak-brown-bear-2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/app-icon.png?v=danjjak-bear-1",
+      "src": "/app-icon.png?v=danjjak-brown-bear-2",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
